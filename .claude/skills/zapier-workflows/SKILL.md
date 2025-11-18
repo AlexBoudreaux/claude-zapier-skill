@@ -194,12 +194,74 @@ Use MCP tools when:
 2. **Check references:** Use Read tool on appropriate reference file for details
 3. **Check prerequisites:**
    - **If MCP tools needed but not available:** Provide Zapier MCP setup instructions (see below)
+   - **If MCP tools available but not documented:** Trigger tool discovery protocol (see below)
    - **If webhook URL needed but not in references:** Provide webhook extraction instructions (see below)
 4. **Execute:**
    - **For webhook-triggered Zaps:** Use Bash tool with curl to POST to webhook URL (webhooks are created in Zapier dashboard with "Catch Hook" trigger)
    - **For MCP tool workflows:** Call the appropriate Zapier MCP tool directly (configured via https://mcp.zapier.com/mcp/servers)
 5. **Confirm:** Tell user what happened in natural language
 6. **Learn:** If user corrects you, use Edit tool to update the skill files
+7. **Suggest pattern saving:** After successful tool use, offer to save the pattern (see below)
+
+## Proactive Pattern Detection & Learning
+
+**CRITICAL:** After you successfully help the user with MCP tools or workflows, proactively suggest saving valuable patterns.
+
+### When to Suggest Saving Patterns
+
+After completing a task using MCP tools, check if this is a pattern worth saving:
+
+**Look for:**
+- Multi-step tool sequences that worked well
+- Specific parameter combinations the user liked
+- Repeated workflows or use cases
+- Tool preferences the user expressed during the task
+- Successful solutions to user problems
+
+**Suggest saving if:**
+- You used 2+ MCP tools in sequence
+- User expressed satisfaction with the result
+- This seems like something user might repeat
+- User gave specific preferences during the interaction
+
+### How to Suggest Pattern Saving
+
+After completing the task successfully:
+
+```
+"That worked well! I noticed I [describe what you did, e.g., 'used Perplexity to research, then saved results to Google Sheets'].
+
+Would you like me to save this as a pattern? If you tell me:
+- What trigger words to listen for
+- When/why to use this workflow
+- Any preferences or variations
+
+I'll remember it and do this automatically next time!"
+```
+
+### Document the Pattern
+
+If user says yes:
+1. Use Read tool on `references/mcp-patterns.md`
+2. Use Edit tool to add new pattern with:
+   - Pattern name
+   - Trigger phrases
+   - When/why to use it
+   - Step-by-step workflow
+   - Parameters/preferences
+   - Example
+3. Confirm: "Saved! Next time you [trigger], I'll [workflow]."
+
+**Examples of patterns worth saving:**
+- "Research and document" (Perplexity → summarize → Google Sheets)
+- "Expense tracking" (Extract amount/description → format → add to sheet)
+- "Competitive analysis" (Search competitor → analyze → save insights)
+- "Daily briefing" (Multiple searches → synthesize → deliver)
+
+**Don't save:**
+- One-off requests
+- Highly specific/unique situations
+- Simple single-tool uses (unless user asks)
 
 ## Setup Detection & Instructions
 
@@ -223,6 +285,61 @@ When user requests MCP tool functionality but Zapier MCP is not connected, tell 
 
 Once setup, I'll be able to use those Zapier actions directly!"
 ```
+
+### When Zapier MCP Is Connected - Tool Discovery & Documentation
+
+**IMPORTANT:** When Zapier MCP is connected (tools starting with `mcp__zapier__` are available), proactively help the user document them with rich context:
+
+1. **List available tools:**
+   - Check what Zapier MCP tools are available
+   - List them out for the user
+
+2. **Prompt for detailed documentation:**
+   ```
+   "I see you have these Zapier MCP tools available:
+   - mcp__zapier__google_sheets_create_spreadsheet_row
+   - mcp__zapier__perplexity_chat_completion
+   - [etc.]
+
+   To help me use these effectively, I need to understand:
+
+   For each tool you want me to use, please tell me:
+
+   1. WHEN should I use this tool?
+      - What trigger words or phrases?
+      - What situations or contexts?
+      - What types of requests?
+
+   2. WHY should I use this tool vs alternatives?
+      - What's it best for?
+      - When should I NOT use it?
+
+   3. HOW should I use it?
+      - Any specific parameters or preferences?
+      - Default values I should use?
+      - Sheet names, formats, or other specifics?
+
+   4. Any PATTERNS or workflows involving this tool?
+      - Multi-step sequences?
+      - Common combinations with other tools?
+
+   Take your time - the more detail you give me, the better I can serve you!"
+   ```
+
+3. **Document in skill:**
+   - Use Read tool on `references/mcp-patterns.md`
+   - Use Edit tool to add comprehensive documentation:
+     - Tool name and purpose
+     - Trigger phrases (when)
+     - Use cases (why)
+     - Parameters and preferences (how)
+     - Workflow patterns if mentioned
+   - Confirm to user what was documented
+
+**When to trigger this:**
+- First time user mentions Zapier or workflows after MCP setup
+- User explicitly asks "what tools do I have?" or "what can you do with Zapier?"
+- When you detect new Zapier MCP tools that aren't documented in `references/mcp-patterns.md`
 
 ### If User Wants to Add a Webhook-Triggered Zap
 
