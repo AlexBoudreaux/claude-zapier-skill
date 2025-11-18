@@ -71,6 +71,24 @@ description: Manage and trigger pre-built Zapier workflows and MCP tool orchestr
 - Isolated from other projects
 - Useful for project-specific workflows
 
+### ⚠️ Security Warning
+
+**IMPORTANT:** This skill stores webhook URLs and workflow details in plain text files.
+
+**Webhook URLs contain authentication tokens.** If someone has your webhook URL, they can trigger your Zaps.
+
+**Best practices:**
+- ✅ Install globally at `~/.claude/skills/` (not in project repos)
+- ✅ Add `.claude/` to your `.gitignore` if installed in a project
+- ✅ Never commit skill files with real webhook URLs to public repos
+- ✅ Regenerate webhook URLs if accidentally exposed
+- ✅ Use Zapier's webhook authentication features when available
+
+**If you need to share this skill:**
+- Remove real webhook URLs first
+- Replace with placeholder examples
+- Or use separate webhook URLs for sharing/testing
+
 ### Prerequisites
 
 **Required:**
@@ -396,6 +414,115 @@ Claude: [uses Read tool on references/mcp-patterns.md]
         "Got it - updated the skill. I'll use 'Personal Budget' sheet
          for expense tracking from now on."
 ```
+
+## FAQ & Troubleshooting
+
+### "Claude isn't detecting my Zapier MCP tools"
+
+**Check if MCP is connected:**
+- Look for tools starting with `mcp__zapier__` in your available tools
+- Try asking: "What Zapier tools do I have?"
+
+**If not showing up:**
+1. Verify you ran the connection command from https://mcp.zapier.com/mcp/servers
+2. Restart Claude Code completely (not just reload)
+3. Check your Claude Code MCP settings
+4. Verify the authorization token in the command was correct
+
+### "Claude isn't suggesting to save patterns"
+
+**Pattern detection triggers when:**
+- You use 2+ MCP tools in sequence
+- The task completes successfully
+- It seems repeatable (not a one-off request)
+
+**Try explicitly asking:**
+- "Can you save this as a pattern?"
+- "Remember this workflow for next time"
+
+### "Webhook URL not triggering my Zap"
+
+**Common issues:**
+1. **Wrong URL** - Make sure you copied the full URL from Test tab
+2. **Zap not turned on** - Enable the Zap in Zapier dashboard
+3. **Trigger node incorrect** - Must be "Webhooks by Zapier" → "Catch Hook"
+4. **Firewall/network** - Check if curl command works from terminal first
+
+**Test manually:**
+```bash
+curl -X POST https://hooks.zapier.com/hooks/catch/[your-url]
+```
+
+### "Claude keeps asking to document tools I already documented"
+
+**Likely causes:**
+- Tools documented but file not saved properly
+- Using different Claude Code instance/installation
+- Skill installed at project level, not global
+
+**Fix:**
+1. Check `references/mcp-patterns.md` has your tools
+2. Verify skill location: `~/.claude/skills/` (global) vs `./.claude/skills/` (project)
+3. If project-level, copy to global for cross-project persistence
+
+### "How do I know if the skill is working?"
+
+**Signs it's working:**
+1. When you mention Zapier/workflows, Claude mentions checking references
+2. Claude asks detailed questions (WHEN/WHY/HOW) about tools
+3. After using tools, Claude suggests saving patterns
+4. Claude successfully triggers your webhooks
+
+**Quick test:**
+1. Ask: "What Zapier tools do I have?"
+2. Add a fake webhook and tell Claude about it
+3. Check if it was added to `references/zaps.md`
+
+### "Skill files getting too large / slow to load"
+
+**If reference files grow too large:**
+- Review and remove outdated/unused patterns
+- Consolidate similar workflows
+- Keep only actively-used tools documented
+- Consider splitting into multiple skill instances for different domains
+
+**Performance tips:**
+- Keep trigger phrases concise and specific
+- Avoid documenting one-off workflows
+- Use pattern categories to organize
+
+### "I want to reset the skill to template state"
+
+**To start fresh:**
+1. Backup your current skill files (if you want to keep anything)
+2. Delete the skill directory
+3. Re-clone from GitHub: https://github.com/AlexBoudreaux/claude-zapier-skill
+4. Copy fresh template to `~/.claude/skills/`
+
+### "Can I use this skill without Zapier MCP?"
+
+**Yes!** The skill works with:
+- **Only webhooks** - Trigger multi-step Zaps without MCP
+- **Only MCP tools** - Document tool usage without webhooks
+- **Both** - Get full functionality
+
+Each mode is independent and valuable on its own.
+
+### "Security: I accidentally committed webhook URLs"
+
+**Immediate actions:**
+1. Remove the commit from git history (git rebase, BFG Repo-Cleaner)
+2. Regenerate webhook URLs in Zapier dashboard:
+   - Edit the Zap
+   - Delete and re-add the webhook trigger node
+   - Get new webhook URL
+3. Update skill files with new URLs
+4. Add `.claude/` to `.gitignore`
+
+**Prevention:**
+- Install skill globally (`~/.claude/skills/`)
+- Never commit `.claude/` directory in projects
+- Use placeholder URLs in shared examples
 
 ## Important Notes
 
